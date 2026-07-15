@@ -7,15 +7,12 @@ OS NOSSOS tipos, em inglês. Quem traduz Trivus <-> estes tipos é o adaptador
 (adapters/crm/trivus.py), e só ele.
 """
 
-from datetime import datetime
-
-from pydantic import BaseModel
+from pydantic import AwareDatetime, BaseModel
 
 from agente.domain.enums import (
     AppointmentStatus,
     EscalationTrigger,
     LeadPriority,
-    ServiceIntent,
 )
 
 
@@ -25,7 +22,7 @@ class Contact(BaseModel):
     full_name: str
     phone: str
     email: str | None = None
-    intent: ServiceIntent | None = None         # pode não estar qualificado ainda
+    intent: str | None = None                   # RN-02; None se não qualificado ainda
     priority: LeadPriority = LeadPriority.MEDIUM
     notes: str | None = None
 
@@ -35,15 +32,15 @@ class AvailableSlot(BaseModel):
     Um horário livre. CALCULADO pelo agente a partir da SchedulingPolicy do
     tenant (o Trivus não fornece isto). `start`/`end` são datetime COM fuso.
     """
-    start: datetime
-    end: datetime
+    start: AwareDatetime
+    end: AwareDatetime
 
 
 class AppointmentRequest(BaseModel):
     """Pedido para agendar — o que o agente entrega à porta."""
     contact_id: str
-    intent: ServiceIntent                       # comprar/vender define o "serviço"
-    start: datetime
+    intent: str                                 # RN-02: a intent define o "serviço"
+    start: AwareDatetime
     notes: str | None = None
 
 
@@ -51,8 +48,8 @@ class Appointment(BaseModel):
     """Agendamento confirmado — o que a porta devolve."""
     id: str
     contact_id: str
-    start: datetime
-    end: datetime
+    start: AwareDatetime
+    end: AwareDatetime
     status: AppointmentStatus = AppointmentStatus.SCHEDULED
 
 

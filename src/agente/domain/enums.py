@@ -1,9 +1,7 @@
 from enum import StrEnum
 
-
-class ServiceIntent(StrEnum):
-    BUY = "buy"
-    SELL = "sell"
+# Nota (RN-02): NÃO existe enum de intents. As intenções são declaradas por tenant
+# na ficha (Tenant.intents) e tratadas como str no domínio — o motor é agnóstico a ramo.
 
 
 class AvailabilityMode(StrEnum):

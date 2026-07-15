@@ -9,14 +9,14 @@ sabemos pouco.
 
 from pydantic import BaseModel
 
-from agente.domain.enums import LeadPriority, ServiceIntent
+from agente.domain.enums import LeadPriority
 
 
 class LeadInfo(BaseModel):
     # Mínimo para o lead existir:
     full_name: str
     phone: str
-    intent: ServiceIntent                       # comprar ou vender
+    intent: str                                 # RN-02: intent do vocabulário do tenant
 
     # Enriquecido ao longo da conversa:
     priority: LeadPriority = LeadPriority.MEDIUM

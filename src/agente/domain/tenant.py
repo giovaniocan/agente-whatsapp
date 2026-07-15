@@ -7,7 +7,7 @@ falar com o CRM dele. O domínio e a aplicação leem esta ficha; nunca
 dependem de um cliente específico.
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class Persona(BaseModel):
@@ -20,7 +20,9 @@ class Persona(BaseModel):
 class Service(BaseModel):
     # Um serviço agendável. Na revenda: "Comprar veículo" / "Vender veículo".
     name: str
-    duration_minutes: int          # atendimento dura 60 min neste cliente
+    intent: str                    # RN-02: aponta para uma intent declarada na ficha
+    duration_minutes: int          # duração deste serviço (revenda: 60)
+    capacity: int = 1              # RN-11: atendimentos simultâneos (salão manicure: 1)
     requires_salesperson: bool = True
 
 
@@ -59,7 +61,8 @@ class CRMConfig(BaseModel):
     type: str                                          # "trivus" | "fake" | ...
     base_url: str = ""
     api_key: str = ""                                  # em produção vem de env, não do arquivo
-    settings: dict[str, str] = Field(default_factory=dict)  # config específica do adapter (ex.: store_id)
+    # config específica do adapter (ex.: store_id)
+    settings: dict[str, str] = Field(default_factory=dict)
 
 
 class Tenant(BaseModel):
@@ -67,7 +70,24 @@ class Tenant(BaseModel):
     id: str
     name: str
     persona: Persona
+    intents: list[str]             # RN-02: vocabulário de intenções deste tenant
     services: list[Service]
     scheduling: SchedulingPolicy
     crm: CRMConfig
     salespeople: list[Salesperson] = Field(default_factory=list)
+
+    def service_for(self, intent: str) -> Service | None:
+        # RN-11: o serviço (duração/capacidade) da intent, ou None se não houver.
+        return next((s for s in self.services if s.intent == intent), None)
+
+    @model_validator(mode="after")
+    def _services_reference_declared_intents(self) -> "Tenant":
+        # RN-02: nenhum serviço pode apontar para intent fora das declaradas.
+        declared = set(self.intents)
+        unknown = [s.intent for s in self.services if s.intent not in declared]
+        if unknown:
+            raise ValueError(
+                f"serviços apontam para intents não declaradas: {sorted(set(unknown))}; "
+                f"declaradas: {sorted(declared)}"
+            )
+        return self
