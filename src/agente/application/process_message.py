@@ -1,19 +1,20 @@
 """
 Use case maestro: processa uma mensagem recebida.
 
-Fluxo: se a IA não está no comando (handoff), cala-se. Senão, pergunta ao LLM;
-se ele decide chamar uma ferramenta, despacha para o handler correspondente e
-pede ao LLM a resposta final; se ele responde em texto, envia direto.
+Fluxo: se a IA não está no comando (handoff), cala-se. Senão, monta o contexto
+econômico (RN-74), pergunta ao LLM; se ele decide chamar uma ferramenta,
+despacha para o handler e pede a resposta final; se responde em texto, envia.
 
 Os handlers (nome da tool → função) são INJETADOS — a montagem real com os use
-cases vive na fase de wiring (planos 06/07). Aqui é só a orquestração.
+cases vive na fase de wiring. Aqui é só a orquestração.
 """
 
 from collections.abc import Awaitable, Callable, Mapping
 
-from agente.application.tools import build_tool_specs
+from agente.application.context_builder import build_request
 from agente.domain.conversation import Conversation
 from agente.domain.llm import Reply, ToolCall
+from agente.domain.messaging import StoredMessage
 from agente.domain.ports import LLMPort, WhatsAppPort
 from agente.domain.tenant import Tenant
 
@@ -32,20 +33,26 @@ class ProcessIncomingMessage:
         self._llm = llm
         self._whatsapp = whatsapp
         self._handlers = handlers
-        self._tools = build_tool_specs(tenant)
 
-    async def execute(self, conversation: Conversation, text: str) -> None:
-        # RN-31: se não está ACTIVE, a IA não responde (a mensagem seria só
-        # armazenada — persistência entra no plano 05).
+    async def execute(
+        self,
+        conversation: Conversation,
+        text: str,
+        recent_messages: list[StoredMessage] | None = None,
+    ) -> None:
+        # RN-31: se não está ACTIVE, a IA não responde.
         if not conversation.can_ai_reply:
             return
 
-        result = await self._llm.respond(conversation, self._tools)
+        request = build_request(
+            self._tenant, conversation, recent_messages or [], text
+        )
+        result = await self._llm.respond(request)
 
         if isinstance(result, ToolCall):
             await self._dispatch(result)
             # com o resultado em mãos, o LLM redige a resposta final ao cliente.
-            result = await self._llm.respond(conversation, self._tools)
+            result = await self._llm.respond(request)
 
         assert isinstance(result, Reply)
         await self._whatsapp.send_text(conversation.phone, result.text)

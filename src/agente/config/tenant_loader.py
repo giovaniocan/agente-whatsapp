@@ -33,9 +33,11 @@ def _resolve_secret(value: str, field: str) -> str:
 
 
 def load_tenant_from_dict(data: dict[str, Any]) -> Tenant:
-    crm = data.get("crm")
-    if isinstance(crm, dict) and "api_key" in crm:
-        crm["api_key"] = _resolve_secret(str(crm["api_key"]), "crm.api_key")
+    # RN-63: resolve `env:NOME` em todo bloco que carrega segredo.
+    for block in ("crm", "channel", "llm"):
+        cfg = data.get(block)
+        if isinstance(cfg, dict) and "api_key" in cfg:
+            cfg["api_key"] = _resolve_secret(str(cfg["api_key"]), f"{block}.api_key")
     try:
         return Tenant.model_validate(data)
     except ValidationError as exc:

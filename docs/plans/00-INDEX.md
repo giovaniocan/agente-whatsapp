@@ -23,7 +23,7 @@
 | 04 | [Use cases de atendimento](04-use-cases-atendimento.md) | qualificar, agendar, escalar (com fakes) | ✅ |
 | 05 | [Persistência de conversa](05-persistencia-conversa.md) | Postgres + Alembic + locks + dedupe | ✅ |
 | 06 | [Canal Z-API](06-canal-zapi.md) | webhook real: recebe, debounce, responde | ✅ |
-| 07 | [Cérebro LLM plugável (tool use)](07-cerebro-llm.md) | conversa natural executando use cases | ⬜ |
+| 07 | [Cérebro LLM plugável (tool use)](07-cerebro-llm.md) | conversa natural executando use cases | ✅ |
 | 08 | [Adapter TrivusCRM](08-adapter-trivus.md) | lead/agenda de verdade no trivus-api (staging) | ⬜ |
 | 09 | [Scheduler: lembretes/auto-resume](09-scheduler.md) | 3 lembretes + auto-resume + follow-up | ⬜ |
 | 10 | [RAG (conhecimento)](10-rag.md) | tool search_knowledge com pgvector | ⬜ |

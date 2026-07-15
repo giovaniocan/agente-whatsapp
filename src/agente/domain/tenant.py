@@ -52,6 +52,21 @@ class SchedulingPolicy(BaseModel):
     working_hours: list[WorkingHours] = Field(default_factory=list)
 
 
+class LlmConfig(BaseModel):
+    """
+    Cérebro do tenant (RN-70). `type` discrimina o provedor; o resto controla
+    custo/economia de token (RN-74/75/76).
+    """
+    type: str = "anthropic"                    # "anthropic" | "openai_compat" | ...
+    model: str = "claude-opus-4-8"
+    summary_model: str = "claude-haiku-4-5"    # modelo barato p/ resumir (RN-75)
+    recent_window: int = 10                    # últimas N mensagens verbatim (RN-74)
+    prompt_cache: bool = True                  # cachear prefixo estável (RN-76)
+    base_url: str = ""                         # openai_compat: Groq/Ollama/…
+    api_key: str = ""                          # via env (RN-63)
+    settings: dict[str, str] = Field(default_factory=dict)
+
+
 class HandoffConfig(BaseModel):
     # Escalonamento para humano (RN-31).
     team_phone: str = ""                   # número interno do time (WhatsApp)
@@ -94,6 +109,7 @@ class Tenant(BaseModel):
     scheduling: SchedulingPolicy
     crm: CRMConfig
     channel: ChannelConfig = Field(default_factory=ChannelConfig)
+    llm: LlmConfig = Field(default_factory=LlmConfig)
     handoff: HandoffConfig = Field(default_factory=HandoffConfig)
     salespeople: list[Salesperson] = Field(default_factory=list)
 

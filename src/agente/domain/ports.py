@@ -14,7 +14,7 @@ from typing import Any, Protocol, runtime_checkable
 from agente.domain.conversation import Conversation
 from agente.domain.crm import Appointment, AppointmentRequest, Contact, HandoffTask
 from agente.domain.enums import LeadPriority
-from agente.domain.llm import Reply, ToolCall, ToolSpec
+from agente.domain.llm import LlmRequest, Reply, ToolCall
 from agente.domain.messaging import StoredMessage
 
 
@@ -120,8 +120,7 @@ class KnowledgePort(Protocol):
 
 
 class LLMPort(Protocol):
-    """Cérebro plugável (RN-70/RN-71). Refinada no plano 07."""
+    """Cérebro plugável (RN-70/RN-71). Recebe uma requisição NEUTRA e devolve
+    texto ou chamada de ferramenta — o adapter traduz para o provedor."""
 
-    async def respond(
-        self, conversation: Conversation, tools: list[ToolSpec]
-    ) -> Reply | ToolCall: ...
+    async def respond(self, request: LlmRequest) -> Reply | ToolCall: ...
