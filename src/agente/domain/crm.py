@@ -37,10 +37,15 @@ class AvailableSlot(BaseModel):
 
 
 class AppointmentRequest(BaseModel):
-    """Pedido para agendar — o que o agente entrega à porta."""
+    """Pedido para agendar — o que o agente entrega à porta.
+
+    Carrega o intervalo completo (start+end): o use case calcula `end` a partir
+    da duração do serviço; o CRM só persiste, não conhece durações.
+    """
     contact_id: str
     intent: str                                 # RN-02: a intent define o "serviço"
     start: AwareDatetime
+    end: AwareDatetime
     notes: str | None = None
 
 
