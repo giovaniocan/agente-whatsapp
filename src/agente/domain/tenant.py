@@ -52,6 +52,13 @@ class SchedulingPolicy(BaseModel):
     working_hours: list[WorkingHours] = Field(default_factory=list)
 
 
+class HandoffConfig(BaseModel):
+    # Escalonamento para humano (RN-31).
+    team_phone: str = ""                   # número interno do time (WhatsApp)
+    auto_resume_hours: int = 4             # sem humano em X horas, a IA retoma
+    message: str = "Vou te transferir para um atendente, um instante 🙂"
+
+
 class CRMConfig(BaseModel):
     """
     Como este tenant fala com o CRM dele. `type` é o DISCRIMINADOR: a fábrica
@@ -74,6 +81,7 @@ class Tenant(BaseModel):
     services: list[Service]
     scheduling: SchedulingPolicy
     crm: CRMConfig
+    handoff: HandoffConfig = Field(default_factory=HandoffConfig)
     salespeople: list[Salesperson] = Field(default_factory=list)
 
     def service_for(self, intent: str) -> Service | None:

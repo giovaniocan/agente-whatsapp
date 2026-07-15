@@ -17,6 +17,9 @@ class _FullCrm:
     async def get_scheduled_appointments(self, day):  # type: ignore[no-untyped-def]
         ...
 
+    async def get_appointment(self, appointment_id):  # type: ignore[no-untyped-def]
+        ...
+
     async def create_appointment(self, request):  # type: ignore[no-untyped-def]
         ...
 

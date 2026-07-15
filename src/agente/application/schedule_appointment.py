@@ -6,7 +6,7 @@ COMMIT contra a corrida de duas conversas (RN-13) e agenda os 3 lembretes
 (RN-50). Nada de sobrescrever: se o horário lotou, oferece alternativas.
 """
 
-from datetime import datetime, time, timedelta
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from agente.application.errors import (
@@ -14,6 +14,7 @@ from agente.application.errors import (
     MissingLeadDataError,
     SlotTakenError,
 )
+from agente.application.reminders import schedule_reminders
 from agente.domain.crm import Appointment, AppointmentRequest
 from agente.domain.lead import LeadInfo
 from agente.domain.ports import CRMPort, SchedulerPort
@@ -66,7 +67,7 @@ class ScheduleAppointment:
                 notes=draft.notes,
             )
         )
-        await self._schedule_reminders(appointment, draft.phone)
+        await schedule_reminders(self._scheduler, self._tenant, appointment, draft.phone)
         return appointment
 
     def _missing_fields(self, draft: LeadInfo | None, start: datetime | None) -> list[str]:
@@ -78,16 +79,3 @@ class ScheduleAppointment:
         if start is None:
             missing.append("appointment_time")
         return missing
-
-    async def _schedule_reminders(self, appointment: Appointment, phone: str) -> None:
-        # RN-50: véspera, manhã do dia (09:00 local) e 1h antes, no fuso do tenant.
-        tz = ZoneInfo(self._tenant.scheduling.timezone)
-        local_day = appointment.start.astimezone(tz).date()
-        run_ats = [
-            appointment.start - timedelta(days=1),
-            datetime.combine(local_day, time(9, 0), tzinfo=tz),
-            appointment.start - timedelta(hours=1),
-        ]
-        payload = {"appointment_id": appointment.id, "phone": phone}
-        for run_at in run_ats:
-            await self._scheduler.schedule("reminder", run_at, payload)

@@ -40,6 +40,8 @@ class CRMPort(Protocol):
 
     async def cancel_appointment(self, appointment_id: str) -> None: ...
 
+    async def get_appointment(self, appointment_id: str) -> Appointment | None: ...
+
     async def reschedule_appointment(
         self, appointment_id: str, new_start: datetime
     ) -> Appointment: ...
@@ -68,11 +70,23 @@ class ConversationStorePort(Protocol):
 
 
 class SchedulerPort(Protocol):
-    """Agenda jobs (lembretes, auto-resume, follow-up) — RN-50/RN-51/RN-31."""
+    """Agenda jobs (lembretes, auto-resume, follow-up) — RN-50/RN-51/RN-31.
 
-    async def schedule(self, kind: str, run_at: datetime, payload: dict[str, Any]) -> str: ...
+    `correlation_id` agrupa jobs de uma mesma entidade (ex.: agendamento), para
+    cancelá-los em bloco quando ela muda (reagendar/cancelar recalcula lembretes).
+    """
+
+    async def schedule(
+        self,
+        kind: str,
+        run_at: datetime,
+        payload: dict[str, Any],
+        correlation_id: str | None = None,
+    ) -> str: ...
 
     async def cancel(self, job_id: str) -> None: ...
+
+    async def cancel_by_correlation(self, correlation_id: str) -> None: ...
 
 
 class KnowledgePort(Protocol):

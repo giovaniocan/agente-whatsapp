@@ -53,6 +53,9 @@ class FakeCRM:
             if a.status is AppointmentStatus.SCHEDULED and a.start.date() == day
         ]
 
+    async def get_appointment(self, appointment_id: str) -> Appointment | None:
+        return self._appointments.get(appointment_id)
+
     async def create_appointment(self, request: AppointmentRequest) -> Appointment:
         appt = Appointment(
             id=uuid4().hex,
