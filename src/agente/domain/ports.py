@@ -119,6 +119,12 @@ class KnowledgePort(Protocol):
     async def search(self, tenant_id: str, query: str, k: int = 5) -> list[str]: ...
 
 
+class EmbeddingPort(Protocol):
+    """Gera embeddings de texto (RAG). Provedor plugável (fake/openai/voyage)."""
+
+    async def embed(self, texts: list[str]) -> list[list[float]]: ...
+
+
 class LLMPort(Protocol):
     """Cérebro plugável (RN-70/RN-71). Recebe uma requisição NEUTRA e devolve
     texto ou chamada de ferramenta — o adapter traduz para o provedor."""

@@ -8,6 +8,7 @@ jobs agendados. Datas sempre tz-aware (timestamptz).
 from datetime import datetime
 from typing import Any
 
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import JSON, DateTime, String, UniqueConstraint, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -54,6 +55,27 @@ class ProcessedMessageRow(Base):
     __tablename__ = "processed_messages"
 
     provider_message_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+
+class KnowledgeChunkRow(Base):
+    """Base de conhecimento por tenant (RAG, plano 10). `embedding` é um vetor
+    pgvector sem dimensão fixa (a dimensão trava quando o provedor real for
+    escolhido — aí entra também o índice ivfflat)."""
+
+    __tablename__ = "knowledge_chunks"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "content_hash", name="uq_chunk_tenant_hash"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    source: Mapped[str] = mapped_column(String(255), default="")
+    content: Mapped[str] = mapped_column(String)
+    content_hash: Mapped[str] = mapped_column(String(64))
+    embedding: Mapped[list[float]] = mapped_column(Vector())
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

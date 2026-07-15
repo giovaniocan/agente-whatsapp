@@ -20,7 +20,7 @@ from agente.application.schedule_appointment import ScheduleAppointment
 from agente.domain.conversation import Conversation
 from agente.domain.enums import EscalationTrigger, LeadPriority
 from agente.domain.lead import LeadInfo
-from agente.domain.ports import CRMPort, SchedulerPort, WhatsAppPort
+from agente.domain.ports import CRMPort, KnowledgePort, SchedulerPort, WhatsAppPort
 from agente.domain.tenant import Tenant
 
 ToolHandler = Callable[[dict[str, object]], Awaitable[str]]
@@ -33,6 +33,7 @@ def build_handlers(
     whatsapp: WhatsAppPort,
     conversation: Conversation,
     now: datetime,
+    knowledge: KnowledgePort | None = None,
 ) -> Mapping[str, ToolHandler]:
     phone = conversation.phone
 
@@ -110,6 +111,15 @@ def build_handlers(
         )
         return "escalado"
 
+    async def search_knowledge(args: dict[str, object]) -> str:
+        if knowledge is None:
+            return "base de conhecimento indisponível — diga que vai confirmar com o time"
+        chunks = await knowledge.search(tenant.id, str(args["query"]), k=3)
+        if not chunks:
+            # reforço da RN-30: sem fonte, o LLM não inventa preço/condição.
+            return "nada encontrado — diga que vai confirmar com o time; não invente"
+        return "\n---\n".join(chunks)
+
     return {
         "get_availability": get_availability,
         "schedule_appointment": schedule_appointment,
@@ -117,4 +127,5 @@ def build_handlers(
         "cancel_appointment": cancel_appointment,
         "qualify_lead": qualify_lead,
         "escalate_to_human": escalate_to_human,
+        "search_knowledge": search_knowledge,
     }

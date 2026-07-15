@@ -22,6 +22,7 @@ ALLOWED_TOOLS: list[str] = [
     "cancel_appointment",
     "qualify_lead",
     "escalate_to_human",
+    "search_knowledge",
 ]
 
 # Ações que o agente NUNCA executa (não existem como ferramenta) — RN-30.
@@ -116,5 +117,13 @@ def build_tool_specs(tenant: Tenant) -> list[ToolSpec]:
                 },
                 ["reason"],
             ),
+        ),
+        ToolSpec(
+            name="search_knowledge",
+            description=(
+                "Busca na base de conhecimento do negócio (FAQ, políticas, serviços). "
+                "Use antes de responder dúvidas sobre o negócio; nunca invente."
+            ),
+            parameters=_obj({"query": _str("a pergunta do cliente")}, ["query"]),
         ),
     ]

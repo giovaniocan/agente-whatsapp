@@ -24,6 +24,9 @@ async def sessionmaker() -> object:
     engine = create_async_engine(TEST_DB_URL)
     try:
         async with engine.begin() as conn:
+            from sqlalchemy import text
+
+            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
             await conn.run_sync(Base.metadata.drop_all)
             await conn.run_sync(Base.metadata.create_all)
     except Exception as exc:  # noqa: BLE001
