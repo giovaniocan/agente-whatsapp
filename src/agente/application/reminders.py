@@ -22,7 +22,12 @@ def reminder_run_ats(tenant: Tenant, appointment: Appointment) -> list[datetime]
 async def schedule_reminders(
     scheduler: SchedulerPort, tenant: Tenant, appointment: Appointment, phone: str
 ) -> None:
-    payload = {"appointment_id": appointment.id, "phone": phone}
+    payload = {
+        "appointment_id": appointment.id,
+        "phone": phone,
+        "tenant_id": tenant.id,
+        "start": appointment.start.isoformat(),   # o handler monta a mensagem disto
+    }
     for run_at in reminder_run_ats(tenant, appointment):
         await scheduler.schedule(
             "reminder", run_at, payload, correlation_id=appointment.id
