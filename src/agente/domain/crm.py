@@ -48,6 +48,7 @@ class Appointment(BaseModel):
     """Agendamento confirmado — o que a porta devolve."""
     id: str
     contact_id: str
+    intent: str                                 # RN-11: casa ocupação por serviço
     start: AwareDatetime
     end: AwareDatetime
     status: AppointmentStatus = AppointmentStatus.SCHEDULED
