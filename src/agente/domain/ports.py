@@ -7,6 +7,7 @@ as implementações vivem em `adapters/`. Assinaturas usam tipos do domínio —
 nenhum vocabulário externo aqui (RN-60).
 """
 
+from contextlib import AbstractAsyncContextManager
 from datetime import date, datetime
 from typing import Any, Protocol, runtime_checkable
 
@@ -66,6 +67,10 @@ class ConversationStorePort(Protocol):
 
     async def mark_message_seen(self, provider_message_id: str) -> bool:
         """True se já vista (ignorar); False se é nova. Idempotência do webhook."""
+        ...
+
+    def lock(self, key: str) -> AbstractAsyncContextManager[None]:
+        """Lock por conversa (RN-44): serializa o processamento do mesmo telefone."""
         ...
 
 
