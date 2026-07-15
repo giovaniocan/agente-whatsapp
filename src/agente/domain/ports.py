@@ -52,6 +52,7 @@ class CRMPort(Protocol):
     async def create_handoff_task(self, task: HandoffTask) -> None: ...
 
 
+@runtime_checkable
 class WhatsAppPort(Protocol):
     """Canal de saída (Z-API agora; Evolution depois, RN-40b)."""
 

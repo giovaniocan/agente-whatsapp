@@ -72,6 +72,17 @@ class CRMConfig(BaseModel):
     settings: dict[str, str] = Field(default_factory=dict)
 
 
+class ChannelConfig(BaseModel):
+    """
+    Canal de WhatsApp do tenant (RN-40b). `type` discrimina o gateway:
+    "zapi" | "evolution". `settings` leva o específico (ex.: instance_id).
+    """
+    type: str = "zapi"
+    base_url: str = "https://api.z-api.io"
+    api_key: str = ""                                  # token da instância (via env)
+    settings: dict[str, str] = Field(default_factory=dict)
+
+
 class Tenant(BaseModel):
     # A ficha completa. Agrega tudo que varia por cliente.
     id: str
