@@ -31,6 +31,23 @@ class ConversationRow(Base):
     )
 
 
+class MessageRow(Base):
+    """Histórico de conversa (RN-74). Chaveado por (tenant, phone), como a
+    Conversation do domínio — que não carrega id de banco."""
+
+    __tablename__ = "messages"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    phone: Mapped[str] = mapped_column(String(32), index=True)
+    direction: Mapped[str] = mapped_column(String(3))          # "in" | "out"
+    text: Mapped[str] = mapped_column(String)
+    provider_message_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+
 class ProcessedMessageRow(Base):
     """Idempotência do webhook (RN-42): guarda ids de mensagem já processados."""
 

@@ -13,10 +13,15 @@ from sqlalchemy import select, text
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from agente.adapters.store.models import ConversationRow, ProcessedMessageRow
+from agente.adapters.store.models import (
+    ConversationRow,
+    MessageRow,
+    ProcessedMessageRow,
+)
 from agente.domain.conversation import Conversation
 from agente.domain.enums import HandoffStatus
 from agente.domain.lead import LeadInfo
+from agente.domain.messaging import StoredMessage
 
 
 class PostgresConversationStore:
@@ -73,6 +78,42 @@ class PostgresConversationStore:
             inserted = await session.scalar(stmt)
             await session.commit()
             return inserted is None   # None = conflito = já vista
+
+    async def add_message(
+        self,
+        tenant_id: str,
+        phone: str,
+        direction: str,
+        text: str,
+        provider_message_id: str | None = None,
+    ) -> None:
+        async with self._sessionmaker() as session:
+            session.add(
+                MessageRow(
+                    tenant_id=tenant_id,
+                    phone=phone,
+                    direction=direction,
+                    text=text,
+                    provider_message_id=provider_message_id,
+                )
+            )
+            await session.commit()
+
+    async def recent_messages(
+        self, tenant_id: str, phone: str, limit: int
+    ) -> list[StoredMessage]:
+        async with self._sessionmaker() as session:
+            rows = await session.scalars(
+                select(MessageRow)
+                .where(MessageRow.tenant_id == tenant_id, MessageRow.phone == phone)
+                .order_by(MessageRow.id.desc())
+                .limit(limit)
+            )
+            # buscamos as N últimas (desc) e devolvemos em ordem cronológica.
+            return [
+                StoredMessage(direction=r.direction, text=r.text)
+                for r in reversed(rows.all())
+            ]
 
     @asynccontextmanager
     async def lock(self, key: str) -> AsyncIterator[None]:

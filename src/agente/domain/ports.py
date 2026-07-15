@@ -15,6 +15,7 @@ from agente.domain.conversation import Conversation
 from agente.domain.crm import Appointment, AppointmentRequest, Contact, HandoffTask
 from agente.domain.enums import LeadPriority
 from agente.domain.llm import Reply, ToolCall, ToolSpec
+from agente.domain.messaging import StoredMessage
 
 
 @runtime_checkable
@@ -68,6 +69,23 @@ class ConversationStorePort(Protocol):
 
     async def mark_message_seen(self, provider_message_id: str) -> bool:
         """True se já vista (ignorar); False se é nova. Idempotência do webhook."""
+        ...
+
+    async def add_message(
+        self,
+        tenant_id: str,
+        phone: str,
+        direction: str,
+        text: str,
+        provider_message_id: str | None = None,
+    ) -> None:
+        """Grava um turno no histórico (base do buffer, RN-74)."""
+        ...
+
+    async def recent_messages(
+        self, tenant_id: str, phone: str, limit: int
+    ) -> list[StoredMessage]:
+        """Últimas N mensagens em ordem cronológica (RN-74)."""
         ...
 
     def lock(self, key: str) -> AbstractAsyncContextManager[None]:

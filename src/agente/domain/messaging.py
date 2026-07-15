@@ -14,3 +14,9 @@ class IncomingMessage(BaseModel):
     phone: str | None = None       # número normalizado (sem DDI 55), quando houver
     lid: str | None = None         # id anônimo do WhatsApp, quando o número é privado
     sender_name: str | None = None
+
+
+class StoredMessage(BaseModel):
+    # Um turno do histórico (para o buffer de contexto do LLM, RN-74).
+    direction: str                 # "in" (cliente) | "out" (agente)
+    text: str
