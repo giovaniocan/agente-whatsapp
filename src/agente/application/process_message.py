@@ -51,6 +51,10 @@ class ProcessIncomingMessage:
 
         if isinstance(result, ToolCall):
             await self._dispatch(result)
+            # se a ferramenta escalou para humano, a mensagem ao cliente já foi
+            # enviada pelo use case — a IA não fala mais (RN-31).
+            if not conversation.can_ai_reply:
+                return
             # com o resultado em mãos, o LLM redige a resposta final ao cliente.
             result = await self._llm.respond(request)
 
