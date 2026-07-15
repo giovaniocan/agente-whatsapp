@@ -44,6 +44,15 @@ recebe webhook, filtra, agrupa (debounce), processa em background e responde.
 - [ ] Teste: mesmo `message_id` duas vezes → segunda ignorada (dedupe do plano 05)
 - [ ] Commit: `feat(api): whatsapp webhook, 200-first + background processing`
 
+## Tarefa 6.3b — Armazenar histórico de mensagens (base do buffer, RN-74/75)
+
+- [ ] Migration: tabela `messages` (id, conversation_id FK, direction in/out, text,
+      provider_message_id, created_at) — o histórico que o summarization buffer consome
+- [ ] Teste: store grava mensagem in/out; `recent_messages(conversation, n)` devolve as
+      últimas N em ordem; dedupe por provider_message_id continua (RN-42)
+- [ ] Ver falhar → implementar no PostgresConversationStore
+- [ ] Commit: `feat(store): message history for summarization buffer (RN-74)`
+
 ## Tarefa 6.4 — Debounce (RN-43) e lock (RN-44)
 
 - [ ] Teste: 3 mensagens do mesmo phone em 2s → UMA chamada ao ProcessIncomingMessage

@@ -140,6 +140,33 @@ Um **único motor** serve todos os tenants; o que muda por tenant é a **ficha d
   (fronteira humana) e a RN-02 (intents da ficha) valem para QUALQUER provedor — os testes
   do tool-set rodam contra o formato neutro, não contra um provedor.
 
+### Cérebro — economia de tokens e segurança
+
+- **RN-74 — NUNCA enviar o histórico inteiro.** O contexto enviado ao LLM é sempre:
+  `system prompt (cacheável)` + `resumo rolante` + `últimas N mensagens verbatim` +
+  `mensagem atual`. N é configurável por tenant (`llm.recent_window`, default 10).
+  O adapter monta isso; o motor entrega a `Conversation` (que já carrega `summary`).
+- **RN-75 — Summarization buffer.** Quando o histórico passa de um limiar, as mensagens
+  mais antigas são resumidas para `Conversation.summary` por um modelo BARATO
+  (`llm.summary_model`, ex. Haiku) e descartadas do envio verbatim. Resumir é escrita
+  incremental (resumo + novas antigas → novo resumo), não do zero toda vez.
+- **RN-76 — Prompt caching é obrigatório quando o provedor suporta.** O prefixo estável
+  por tenant (system prompt + tools + few-shot) é marcado como cacheável (ex. `cache_control`
+  da Anthropic). Isso permite prefixo rico (few-shot/regras) SEM pagar por ele a cada
+  mensagem — a alavanca nº 1 de custo. Ordem do payload: estável primeiro, dinâmico depois.
+- **RN-77 — Extração estruturada, não parsing de texto.** Capturar dados do lead
+  (nome, intent, veículo, etc.) usa saída estruturada (tool/JSON schema) validada por
+  Pydantic na fronteira (RN-61). Nunca extrair via regex/heurística sobre texto livre.
+- **RN-78 — Defesa contra prompt injection (defesa em profundidade).** (1) Todo texto do
+  WhatsApp é NÃO CONFIÁVEL; o system prompt instrui a ignorar instruções embutidas na
+  mensagem do usuário que tentem alterar regras/persona. (2) A defesa real é a RN-30: como
+  ações proibidas (desconto/preço/contrato) não existem como ferramenta, uma injeção
+  bem-sucedida não consegue executá-las. Prompt é a 1ª linha; a ausência de ferramenta é a
+  garantia.
+- **RN-79 — Rastreamento de budget de tokens.** Cada requisição registra tokens de entrada,
+  de entrada CACHEADOS, de saída e custo estimado, por conversa e por tenant. Métrica
+  exposta desde o dia 1 (base para achar os 20–30% otimizáveis).
+
 ### Lembretes e follow-up
 
 - **RN-50 — Lembretes de agendamento: 3 disparos** — 1 dia antes, manhã do dia, 1 hora
@@ -213,7 +240,10 @@ Assinaturas completas nos planos; resumo:
   "channel": { "type": "zapi",                           // RN-40b: "zapi" | "evolution"
                "api_key": "env:ZAPI_TOKEN_REVENDA_X" },  // salão poderia usar "evolution"
   "llm": { "type": "anthropic",                          // RN-70: "anthropic" | "openai_compat" | "gemini"
-           "model": "claude-sonnet-5",                   // modelo à sua escolha
+           "model": "claude-sonnet-5",                   // modelo principal
+           "summary_model": "claude-haiku-4-5",          // RN-75: modelo barato p/ resumir
+           "recent_window": 10,                          // RN-74: últimas N msgs verbatim
+           "prompt_cache": true,                         // RN-76: cachear prefixo estável
            "api_key": "env:ANTHROPIC_API_KEY" },         // openai_compat aceita "base_url" (Groq/Ollama/…)
   "crm": { "type": "trivus", "base_url": "https://...",
            "api_key": "env:TRIVUS_TOKEN_REVENDA_X",      // RN-63
