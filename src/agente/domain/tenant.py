@@ -87,11 +87,13 @@ class Tenant(BaseModel):
     # A ficha completa. Agrega tudo que varia por cliente.
     id: str
     name: str
+    webhook_token: str = ""        # token que identifica o tenant no webhook (RN-40)
     persona: Persona
     intents: list[str]             # RN-02: vocabulário de intenções deste tenant
     services: list[Service]
     scheduling: SchedulingPolicy
     crm: CRMConfig
+    channel: ChannelConfig = Field(default_factory=ChannelConfig)
     handoff: HandoffConfig = Field(default_factory=HandoffConfig)
     salespeople: list[Salesperson] = Field(default_factory=list)
 
