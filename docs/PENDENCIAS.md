@@ -26,14 +26,24 @@
 - [ ] Confirmar modelo por tenant na ficha: default `claude-sonnet-5` (principal)
       + `claude-haiku-4-5` (resumo barato, RN-75). Trocar se preferir.
 
-## 🟡 Integração com o Trivus (Plano 08)
+## 🟡 Integração com o Trivus (Plano 08) — QUESTIONÁRIO RESPONDIDO ✅ (16/07)
 
-- [ ] **Acesso ao repo `trivusauto/trivus-api`** — preciso do `docs/API_REFERENCE.md`
-      e do `/openapi.json` (staging) para copiar payloads REAIS (proibido inventar).
-- [ ] **Usuário de serviço "IA" por loja** no trivus-api (JWT), + credenciais via env
-      (`TRIVUS_TOKEN_<LOJA>`). Confirmar se há endpoint machine-to-machine melhor.
-- [ ] **Ambiente de staging** do trivus-api para o smoke test (criar/agendar/cancelar
-      um lead de teste e ver no Trivus).
+Respostas + payloads reais em `docs/trivus/` (INTEGRACAO_AGENTE, API_REFERENCE,
+openapi.json, ONBOARDING). Design real registrado no `plans/08-adapter-trivus.md`.
+O que ainda depende de você:
+
+- [ ] **Clonar e subir o trivus-api local** (branch `develop`, tem o fix de datas) —
+      ver `docs/trivus/ONBOARDING.md`. Sem staging por ora; o smoke 8.5 roda local.
+      Me diga o path do clone que eu mesmo subo com Docker.
+- [ ] **Criar o usuário de serviço "IA"** (role=client!) na loja piloto e vincular
+      (`/admin/users` + `PUT /admin/users/{id}/stores`); senha via env
+      `TRIVUS_PASSWORD_<LOJA>`; e-mail com TLD real.
+- [ ] Decidir o **`handoff_user_id`** por loja (a quem atribuir o lead no handoff) —
+      ou pedir o PR do `shop_role` no `/team` se quiser rotear por papel.
+- [ ] (Recomendado) Pedir ao time o PR **`GET /crm/leads/{id}`** — barateia muito o
+      append de observações; hoje é lista completa a cada operação.
+- [ ] No go-live da piloto: `PATCH /admin/stores/{id} {"zapi_webhook_enabled": false}`
+      (senão lead em dobro — o agente é a porta de entrada).
 
 ## 🟡 RAG / base de conhecimento (Plano 10)
 
