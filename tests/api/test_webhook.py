@@ -78,3 +78,23 @@ async def test_duplicate_message_is_deduped(make_tenant: Callable[..., Tenant]) 
         resp2 = await client.post("/webhook/whatsapp/TKN-salao", json=_text_payload())
     assert resp2.json()["skipped"] == "duplicate"
     assert len(proc.calls) == 1
+
+
+async def test_rate_limit_returns_429(make_tenant: Callable[..., Tenant]) -> None:
+    # Plano 11.3: proteção do webhook — estourou a janela, 429.
+    proc = _RecordingProcessor()
+    tenant = make_tenant(webhook_token="TKN-salao")
+    store = FakeConversationStore()
+    app = create_app(
+        registry={tenant.webhook_token: tenant},
+        store=store,
+        processor=proc,
+        rate_limit_per_minute=2,
+    )
+    async with await _client(app) as client:
+        r1 = await client.post("/webhook/whatsapp/TKN-salao", json=_text_payload(messageId="A"))
+        r2 = await client.post("/webhook/whatsapp/TKN-salao", json=_text_payload(messageId="B"))
+        r3 = await client.post("/webhook/whatsapp/TKN-salao", json=_text_payload(messageId="C"))
+
+    assert (r1.status_code, r2.status_code, r3.status_code) == (200, 200, 429)
+    assert len(proc.calls) == 2                     # a terceira nem processou

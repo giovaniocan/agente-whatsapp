@@ -27,7 +27,7 @@
 | 08 | [Adapter TrivusCRM](08-adapter-trivus.md) | lead/agenda de verdade no trivus-api (staging) | ⬜ |
 | 09 | [Scheduler: lembretes/auto-resume](09-scheduler.md) | 3 lembretes + auto-resume + follow-up | ✅ |
 | 10 | [RAG (conhecimento)](10-rag.md) | tool search_knowledge com pgvector | ✅ |
-| 11 | [Produção](11-producao.md) | Docker + CI + Coolify + observabilidade + piloto | ⬜ |
+| 11 | [Produção](11-producao.md) | Docker + CI + Coolify + observabilidade + piloto | 🟡 código pronto; deploy pendente |
 
 **Marcos:** M1 = planos 01–04 (motor roda com fakes) · M2 = 05–07 (conversa real) ·
 M3 = 08 (integrado ao Trivus) · M4 = 09–10 · M5 = 11 (piloto em produção).

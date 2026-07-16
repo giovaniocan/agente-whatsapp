@@ -16,7 +16,7 @@ from agente.domain.messaging import IncomingMessage
 from agente.domain.ports import ConversationStorePort
 from agente.domain.tenant import Tenant
 
-Downstream = Callable[[Tenant, str], Awaitable[None]]
+Downstream = Callable[[Tenant, str, str], Awaitable[None]]   # (tenant, phone, texto)
 Sleep = Callable[[float], Awaitable[None]]
 
 _Key = tuple[str, str]
@@ -56,7 +56,7 @@ class DebounceBuffer:
             return
         grouped = "\n".join(texts)
         async with self._store.lock(f"{tenant.id}:{phone}"):
-            await self._downstream(tenant, grouped)
+            await self._downstream(tenant, phone, grouped)
 
     async def drain(self) -> None:
         """Espera todas as janelas abertas fecharem (usado em testes/shutdown)."""

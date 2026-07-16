@@ -33,12 +33,13 @@ ambos. Um teste de arquitetura (Plano 01) quebra o build se isso for violado.
 | **M4** — completo | 09 scheduler · 10 RAG | lembretes, auto-resume, conhecimento |
 | **M5** — produção | 11 deploy | Coolify, observabilidade, piloto shadow |
 
-## Estado atual
+## Estado atual (15/07/2026)
 
-- [x] Domínio inicial: `enums`, `tenant`, `lead`, `crm` (serão retocados no Plano 01)
-- [x] SPEC + 11 planos escritos
-- [ ] **Plano 01 em execução** (TDD, baby steps)
-- [ ] Planos 02–11 pendentes
+- [x] Planos 01–07, 09, 10 concluídos (172 testes; ruff+mypy strict limpos)
+- [x] Plano 11: código de produção pronto (bootstrap, worker, shadow, Docker, CI)
+- [ ] Plano 08 (TrivusCRM): bloqueado — acesso ao trivus-api (ver docs/PENDENCIAS.md)
+- [ ] Deploy real no Coolify + validação com provedores reais
+- Ver o compilado: docs/STATUS.md
 
 ## Como trabalhamos
 

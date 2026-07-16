@@ -18,8 +18,8 @@ async def test_burst_is_grouped_into_a_single_call(
 ) -> None:
     processed: list[str] = []
 
-    async def downstream(tenant: Tenant, text: str) -> None:
-        processed.append(text)
+    async def downstream(tenant: Tenant, phone: str, text: str) -> None:
+        processed.append((phone, text))
 
     release = asyncio.Event()
 
@@ -37,7 +37,7 @@ async def test_burst_is_grouped_into_a_single_call(
     release.set()
     await buf.drain()               # espera o flush
 
-    assert processed == ["oi\nquero\nagendar"]   # uma chamada só, agrupada
+    assert processed == [("44999998888", "oi\nquero\nagendar")]   # uma chamada, agrupada, com phone
 
 
 async def test_processing_runs_inside_the_conversation_lock(
@@ -53,7 +53,7 @@ async def test_processing_runs_inside_the_conversation_lock(
 
     store.lock = spy_lock  # type: ignore[method-assign]
 
-    async def downstream(tenant: Tenant, text: str) -> None: ...
+    async def downstream(tenant: Tenant, phone: str, text: str) -> None: ...
 
     buf = DebounceBuffer(downstream, store, window=0, sleep=_no_wait)
     await buf(make_tenant(), _msg("oi", "m1"))

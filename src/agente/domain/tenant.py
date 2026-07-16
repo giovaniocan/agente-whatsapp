@@ -74,6 +74,13 @@ class HandoffConfig(BaseModel):
     message: str = "Vou te transferir para um atendente, um instante 🙂"
 
 
+class FollowUpConfig(BaseModel):
+    # Follow-up de lead frio (RN-51) — desligado por padrão.
+    enabled: bool = False
+    delay_hours: int = 4                   # sem resposta do cliente por X horas
+    message: str = "Oi! Ainda posso te ajudar com o agendamento? 🙂"
+
+
 class CRMConfig(BaseModel):
     """
     Como este tenant fala com o CRM dele. `type` é o DISCRIMINADOR: a fábrica
@@ -103,6 +110,9 @@ class Tenant(BaseModel):
     id: str
     name: str
     webhook_token: str = ""        # token que identifica o tenant no webhook (RN-40)
+    # Piloto (plano 11.5): "shadow" = a IA só SUGERE (mensagem vai ao time,
+    # nunca ao cliente); "autonomous" = produção de verdade.
+    mode: str = "autonomous"
     persona: Persona
     intents: list[str]             # RN-02: vocabulário de intenções deste tenant
     services: list[Service]
@@ -111,6 +121,7 @@ class Tenant(BaseModel):
     channel: ChannelConfig = Field(default_factory=ChannelConfig)
     llm: LlmConfig = Field(default_factory=LlmConfig)
     handoff: HandoffConfig = Field(default_factory=HandoffConfig)
+    follow_up: FollowUpConfig = Field(default_factory=FollowUpConfig)
     salespeople: list[Salesperson] = Field(default_factory=list)
 
     def service_for(self, intent: str) -> Service | None:

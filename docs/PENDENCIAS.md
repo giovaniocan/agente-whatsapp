@@ -62,3 +62,17 @@
 - Postgres de dev: `docker compose up -d` (porta 5439). ✅
 - Arquitetura, domínio, agenda, use cases, persistência: prontos e testados. ✅
 - Estratégia de custo de token (caching/summary/budget): no contrato (RN-74..79). ✅
+
+## 🆕 Sessão planos 09/10/11 (15/07/2026)
+
+- [ ] **Executar o deploy no Coolify** — infra pronta (`Dockerfile`, `ci.yml`,
+      `docs/DEPLOY.md`); faltam os acessos/secrets. Banco DEVE ser imagem
+      `pgvector/pgvector:pg16`.
+- [ ] **Provedor de embeddings definitivo** (OpenAI vs Voyage). Hoje: OpenAI se
+      `OPENAI_API_KEY` existir, senão FakeEmbedder (só dev). Ao decidir, fixar a
+      dimensão do vetor e criar índice ivfflat (migration).
+- [ ] **Fiação do circuit breaker** nos adapters Z-API/CRM (utilitário pronto e
+      testado em `utils/circuit_breaker.py`).
+- [ ] Follow-up multiestágio (hoje: 1 disparo por resposta, configurável na
+      ficha) — só se o negócio pedir.
+- [ ] Push do repo p/ GitHub para o CI (`.github/workflows/ci.yml`) rodar.

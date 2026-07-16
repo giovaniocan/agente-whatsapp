@@ -7,6 +7,8 @@ timeout). Identifica o tenant pelo token do path, filtra (parser), deduplica
 (6.4) + o maestro (ProcessIncomingMessage).
 """
 
+import time
+from collections import defaultdict, deque
 from collections.abc import Awaitable, Callable
 
 from fastapi import BackgroundTasks, FastAPI, Request
@@ -21,12 +23,32 @@ from agente.domain.tenant import Tenant
 Processor = Callable[[Tenant, IncomingMessage], Awaitable[None]]
 
 
+class _RateLimiter:
+    """Janela deslizante em memória por token (proteção do webhook, plano 11.3)."""
+
+    def __init__(self, per_minute: int) -> None:
+        self._per_minute = per_minute
+        self._hits: dict[str, deque[float]] = defaultdict(deque)
+
+    def allow(self, key: str) -> bool:
+        now = time.monotonic()
+        window = self._hits[key]
+        while window and now - window[0] > 60.0:
+            window.popleft()
+        if len(window) >= self._per_minute:
+            return False
+        window.append(now)
+        return True
+
+
 def create_app(
     registry: dict[str, Tenant],
     store: ConversationStorePort,
     processor: Processor,
+    rate_limit_per_minute: int = 120,
 ) -> FastAPI:
     app = FastAPI(title="Agente WhatsApp")
+    limiter = _RateLimiter(rate_limit_per_minute)
 
     @app.get("/health")
     async def health() -> dict[str, str]:
@@ -39,6 +61,9 @@ def create_app(
         tenant = registry.get(token)
         if tenant is None:
             return JSONResponse({"ok": False, "reason": "unauthorized"}, status_code=401)
+
+        if not limiter.allow(token):
+            return JSONResponse({"ok": False, "reason": "rate_limited"}, status_code=429)
 
         payload = await request.json()
         parsed = parse_incoming(tenant.channel.type, payload)
