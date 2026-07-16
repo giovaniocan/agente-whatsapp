@@ -2,7 +2,7 @@
 Modelos que CRUZAM a porta de CRM — o vocabulário limpo do nosso domínio.
 
 Regra de ouro do Anti-Corruption Layer (ACL): nenhum nome do Trivus aparece
-aqui. Nada de `crm_funnel_leads`, `data_agendamento`, `qualificado`. Estes são
+aqui — nenhum nome de tabela/campo de CRM externo. Estes são
 OS NOSSOS tipos, em inglês. Quem traduz Trivus <-> estes tipos é o adaptador
 (adapters/crm/trivus.py), e só ele.
 """

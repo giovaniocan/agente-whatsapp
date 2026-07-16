@@ -49,6 +49,10 @@ class SchedulingPolicy(BaseModel):
     slot_minutes: int = 60                # tamanho de cada horário
     capacity_per_slot: int = 1            # atendimentos simultâneos (revenda: 2 a 3)
     min_notice_minutes: int = 0           # antecedência mínima (revenda: 0)
+    # Capacidade da LOJA em vez de por serviço: TODA ocupação conta contra a
+    # capacidade, independente da intent (caso revenda; também cobre CRMs que
+    # não registram qual serviço o agendamento é — ex.: Trivus).
+    shared_capacity: bool = False
     working_hours: list[WorkingHours] = Field(default_factory=list)
 
 

@@ -75,7 +75,8 @@ Um **único motor** serve todos os tenants; o que muda por tenant é a **ficha d
   no fuso do tenant. O CRM só informa o que está ocupado.
 - **RN-11 — Duração e capacidade por SERVIÇO.** Cada `Service` tem `duration_minutes` e
   `capacity` próprios (salão: 2 cortes simultâneos, 1 manicure). A `SchedulingPolicy`
-  global fornece defaults. Revenda: 60 min, capacidade 3, para ambos os serviços.
+  global fornece defaults. Revenda: 60 min, capacidade 3, para ambos os serviços. Com `scheduling.shared_capacity: true`, a ocupação vale
+  para a LOJA inteira (toda intent conta) — caso revenda/CRMs que não registram o serviço.
 - **RN-12 — Antecedência mínima configurável.** `min_notice_minutes` na ficha (revenda: 0).
 - **RN-13 — Revalidação no commit.** `ScheduleAppointment` revalida o slot contra a
   disponibilidade no momento de gravar (duas conversas podem disputar a última vaga).

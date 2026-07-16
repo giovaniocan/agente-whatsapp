@@ -208,3 +208,21 @@ def test_is_slot_available_false_when_not_on_grid() -> None:
     # 10:30 não é início de slot numa grade horária.
     service = Service(name="At", intent="x", duration_minutes=60)
     assert is_slot_available(_hourly_policy(), service, _at(10, 30), [], now=_at(9)) is False
+
+
+# --- Capacidade compartilhada da LOJA (caso revenda; adapter Trivus não sabe o serviço) ---
+
+def test_shared_capacity_counts_all_intents() -> None:
+    policy = SchedulingPolicy(
+        timezone="America/Sao_Paulo",
+        shared_capacity=True,
+        working_hours=[WorkingHours(weekday=0, open="09:00", close="18:00")],
+    )
+    buy = Service(name="Comprar", intent="buy_vehicle", duration_minutes=60, capacity=3)
+    # 3 ocupados às 10h, de intents variadas (inclusive desconhecida "")
+    busy = [_appt("buy_vehicle", 10), _appt("sell_vehicle", 10), _appt("", 10)]
+
+    slots = available_slots(policy, buy, MONDAY, busy)
+
+    assert all(s.start.hour != 10 for s in slots)   # capacidade é da LOJA: 3/3 ocupado
+    assert any(s.start.hour == 11 for s in slots)

@@ -15,13 +15,13 @@ def _settings() -> Settings:
     )
 
 
-def test_runtime_loads_ready_tenants_and_skips_pending_adapters() -> None:
+def test_runtime_loads_all_tenants_from_fichas() -> None:
     runtime = build_runtime(_settings())
 
-    # salão (crm fake) entra; revenda (crm trivus, plano 08 pendente) é pulada
+    # salão (fake) e revenda (trivus — plano 08 implementado) carregam
     assert "salao_demo" in runtime.registry_by_id
-    assert "revenda_veiculos" not in runtime.registry_by_id
-    assert "salao_demo" in runtime.pipelines
+    assert "revenda_veiculos" in runtime.registry_by_id
+    assert {"salao_demo", "revenda_veiculos"} <= set(runtime.pipelines)
 
 
 def test_runtime_app_exposes_health_and_webhook() -> None:

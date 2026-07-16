@@ -1,28 +1,74 @@
 {
   "id": "revenda_veiculos",
   "name": "AutoRevenda Demo",
-  "persona": { "name": "Ana", "tone": "cordial e objetivo", "language": "pt-BR" },
-  "intents": ["buy_vehicle", "sell_vehicle"],
+  "persona": {
+    "name": "Ana",
+    "tone": "cordial e objetivo",
+    "language": "pt-BR"
+  },
+  "intents": [
+    "buy_vehicle",
+    "sell_vehicle"
+  ],
   "services": [
-    { "name": "Comprar veículo", "intent": "buy_vehicle", "duration_minutes": 60, "capacity": 3 },
-    { "name": "Vender veículo", "intent": "sell_vehicle", "duration_minutes": 60, "capacity": 3 }
+    {
+      "name": "Comprar veículo",
+      "intent": "buy_vehicle",
+      "duration_minutes": 60,
+      "capacity": 3
+    },
+    {
+      "name": "Vender veículo",
+      "intent": "sell_vehicle",
+      "duration_minutes": 60,
+      "capacity": 3
+    }
   ],
   "scheduling": {
     "timezone": "America/Sao_Paulo",
     "min_notice_minutes": 0,
     "working_hours": [
-      { "weekday": 0, "open": "09:00", "close": "18:00" },
-      { "weekday": 1, "open": "09:00", "close": "18:00" },
-      { "weekday": 2, "open": "09:00", "close": "18:00" },
-      { "weekday": 3, "open": "09:00", "close": "18:00" },
-      { "weekday": 4, "open": "09:00", "close": "18:00" },
-      { "weekday": 5, "open": "09:00", "close": "13:00" }
-    ]
+      {
+        "weekday": 0,
+        "open": "09:00",
+        "close": "18:00"
+      },
+      {
+        "weekday": 1,
+        "open": "09:00",
+        "close": "18:00"
+      },
+      {
+        "weekday": 2,
+        "open": "09:00",
+        "close": "18:00"
+      },
+      {
+        "weekday": 3,
+        "open": "09:00",
+        "close": "18:00"
+      },
+      {
+        "weekday": 4,
+        "open": "09:00",
+        "close": "18:00"
+      },
+      {
+        "weekday": 5,
+        "open": "09:00",
+        "close": "13:00"
+      }
+    ],
+    "shared_capacity": true
   },
   "crm": {
     "type": "trivus",
     "base_url": "https://staging.trivus.example",
-    "api_key": "env:TRIVUS_TOKEN_REVENDA_VEICULOS",
-    "settings": {}
+    "api_key": "env:TRIVUS_PASSWORD_REVENDA_VEICULOS",
+    "settings": {
+      "store_id": "",
+      "email": "",
+      "appointment_minutes": "60"
+    }
   }
 }

@@ -59,7 +59,12 @@ def available_slots(
     o slot só vale se começar em `now + min_notice` ou depois — a comparação é
     tz-aware, então funciona com `now` em qualquer fuso.
     """
-    same_service = [a for a in busy if a.intent == service.intent]
+    # shared_capacity: ocupação é da LOJA (toda intent conta) — caso revenda/Trivus.
+    same_service = (
+        list(busy)
+        if policy.shared_capacity
+        else [a for a in busy if a.intent == service.intent]
+    )
     earliest = (
         now + timedelta(minutes=policy.min_notice_minutes) if now is not None else None
     )

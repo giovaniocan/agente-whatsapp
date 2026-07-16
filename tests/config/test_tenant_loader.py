@@ -27,7 +27,7 @@ def test_real_fichas_load() -> None:
 
 def test_env_reference_is_resolved(monkeypatch: pytest.MonkeyPatch) -> None:
     # RN-63: api_key "env:NOME" vira o valor real da variável de ambiente.
-    monkeypatch.setenv("TRIVUS_TOKEN_REVENDA_VEICULOS", "segredo-123")
+    monkeypatch.setenv("TRIVUS_PASSWORD_REVENDA_VEICULOS", "segredo-123")
     revenda = load_tenant_file(TENANTS_DIR / "revenda_veiculos.json")
     assert revenda.crm.api_key == "segredo-123"
 

@@ -11,9 +11,10 @@ def test_fake_type_returns_fake_crm() -> None:
     assert isinstance(build_crm(CRMConfig(type="fake")), FakeCRM)
 
 
-def test_trivus_type_is_not_implemented_yet() -> None:
-    with pytest.raises(NotImplementedError, match="08"):   # aponta o plano 08
-        build_crm(CRMConfig(type="trivus"))
+def test_trivus_type_returns_trivus_adapter() -> None:
+    from agente.adapters.crm.trivus import TrivusCRM
+
+    assert isinstance(build_crm(CRMConfig(type="trivus", api_key="x")), TrivusCRM)
 
 
 def test_unknown_type_raises_value_error_listing_valid() -> None:
